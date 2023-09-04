@@ -42,9 +42,11 @@ async def give_command(interaction: discord.Interaction, to_user: discord.Member
     sql_fn.get_user(to_user.id, to_user.name)
     nowpt=sql_fn.get_point(interaction.user.id)
     if nowpt < point:
-        await interaction.response.send_message(f"your point,{nowpt} , is not enough. ")
+        await interaction.response.send_message(f"your point,{nowpt} , is not enough. ", ephemeral=True)
         return
     sql_fn.move_point_on_given(interaction.user.id, to_user.id, point)
+    interaction.response.send_message("your point has been moved.",ephemeral=True)
+    return
 
 @client.event
 async def on_raw_reaction_add(RawReactionActionEvent):
