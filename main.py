@@ -7,13 +7,15 @@ from datetime import datetime, timedelta, timezone
 ld()
 
 TOKEN = os.environ["DISCORD_BOT_TOKEN"]
-
-client = discord.Client(intents=discord.Intents.all())
+intents=discord.Intents.all()
+client = discord.Client(intents=intents)
+tree = discord.app_commands.CommandTree(client)
 
 
 @client.event
 async def on_ready():
     print("起動しました")
+    await tree.sync()
 
 
 @client.event
@@ -30,6 +32,19 @@ async def on_message(message):
 
     sql_fn.add_point_on_message_send(message.author.id)
 
+@tree.command(name="give")
+async def give_command(interaction: discord.Interaction, to_user: discord.Member, point: int):
+    if to_user.bot:
+        return
+    if interaction.user.bot:
+        return
+    sql_fn.get_user(interaction.user.id, interaction.user.name)
+    sql_fn.get_user(to_user.id, to_user.name)
+    nowpt=sql_fn.get_point(interaction.user.id)
+    if nowpt < point:
+        await interaction.response.send_message(f"your point,{nowpt} , is not enough. ")
+        return
+    sql_fn.move_point_on_given(interaction.user.id, to_user.id, point)
 
 @client.event
 async def on_raw_reaction_add(RawReactionActionEvent):
