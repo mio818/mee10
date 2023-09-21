@@ -53,7 +53,11 @@ async def on_raw_reaction_add(RawReactionActionEvent):
     """
     リアクションが付与されたときに実行される
     """
-    sql_fn.get_user(RawReactionActionEvent.user_id, RawReactionActionEvent.user_name)
+    user = await client.fetch_user(RawReactionActionEvent.user_id)
+    user_name = user.name
+
+    sql_fn.get_user(RawReactionActionEvent.user_id, user_name)
+
 
     channel = client.get_channel(RawReactionActionEvent.channel_id)
 
@@ -71,7 +75,9 @@ async def on_raw_reaction_add(RawReactionActionEvent):
 
 @client.event
 async def on_raw_reaction_remove(RawReactionActionEvent):
-    sql_fn.get_user(RawReactionActionEvent.user_id, RawReactionActionEvent.user_name)
+    user = await client.fetch_user(RawReactionActionEvent.user_id)
+    user_name = user.name
+    sql_fn.get_user(RawReactionActionEvent.user_id, user_name)
     sql_fn.sub_point_on_reaction(RawReactionActionEvent.user_id)
 
 
