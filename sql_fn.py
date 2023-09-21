@@ -76,6 +76,9 @@ def get_point(id: int) -> int:
     point = fetch_sql("SELECT point FROM points WHERE user_id = %s", (id,))
     return point
 
+def move_point_on_given(from_id: int, to_id: int,value: int):
+    execute_sql("UPDATE points SET point = point - %s WHERE user_id = %s", (value, from_id,))
+    execute_sql("UPDATE points SET point = point + %s WHERE user_id = %s", (value, to_id))
 
 # select文でusersテーブルからユーザー情報を取ってくる関数の定義
 def get_user(id: int, user_name: str):
