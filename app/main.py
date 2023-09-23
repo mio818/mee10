@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 ld()
 
 TOKEN = os.environ["DISCORD_BOT_TOKEN"]
-intents=discord.Intents.all()
+intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
 
@@ -32,21 +32,26 @@ async def on_message(message):
 
     sql_fn.add_point_on_message_send(message.author.id)
 
+
 @tree.command(name="give")
 async def give_command(interaction: discord.Interaction, to_user: discord.Member, point: int):
     if to_user.bot:
         return
     if interaction.user.bot:
         return
+    if point <= 0:
+        await interaction.response.send_message("マイナスは使えないよ", ephemeral=True)
+        return
     sql_fn.get_user(interaction.user.id, interaction.user.name)
     sql_fn.get_user(to_user.id, to_user.name)
-    nowpt=sql_fn.get_point(interaction.user.id)
+    nowpt = sql_fn.get_point(interaction.user.id)
     if nowpt < point:
         await interaction.response.send_message(f"your point,{nowpt} , is not enough. ", ephemeral=True)
         return
     sql_fn.move_point_on_given(interaction.user.id, to_user.id, point)
-    interaction.response.send_message("your point has been moved.",ephemeral=True)
+    await interaction.response.send_message("your point has been moved.", ephemeral=True)
     return
+
 
 @client.event
 async def on_raw_reaction_add(RawReactionActionEvent):
@@ -57,7 +62,6 @@ async def on_raw_reaction_add(RawReactionActionEvent):
     user_name = user.name
 
     sql_fn.get_user(RawReactionActionEvent.user_id, user_name)
-
 
     channel = client.get_channel(RawReactionActionEvent.channel_id)
 
