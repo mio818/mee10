@@ -4,9 +4,11 @@ from dotenv import load_dotenv as ld
 import sql_fn
 from datetime import datetime, timedelta, timezone
 
+
 ld()
 
 TOKEN = os.environ["DISCORD_BOT_TOKEN"]
+TARGET_GUILD_ID = os.environ["TARGET_GUILD_ID"]
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
@@ -20,6 +22,10 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
+    if message.guild.id != TARGET_GUILD_ID:
+        return
+
     if message.author.bot:
         return
 
@@ -61,6 +67,11 @@ async def on_raw_reaction_add(RawReactionActionEvent):
     """
     リアクションが付与されたときに実行される
     """
+
+    if message.guild.id != TARGET_GUILD_ID:
+        return
+
+    
     user = await client.fetch_user(RawReactionActionEvent.user_id)
     user_name = user.name
 
