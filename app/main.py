@@ -23,6 +23,9 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    if not message.guild:
+        return
+
     sql_fn.get_user(message.author.id, message.author.name)
 
     if message.content == "/mypoint":
