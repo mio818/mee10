@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: $USER_PASSWORD
     volumes:
       - ./data:/docker-entrypoint-initdb.d/
-      - ./data2:/var/lib/mysql
+      - db:/var/lib/mysql
 
   app:
     build: .
@@ -21,3 +21,6 @@ services:
     volumes:
       - ./app:/usr/src/app
     command: python3 main.py
+
+volumes:
+  db:
