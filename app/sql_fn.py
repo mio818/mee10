@@ -25,18 +25,6 @@ def conn_db():
 #     print("接続失敗")
 
 
-def execute_sql(qurey, param):
-    try:
-        conn = conn_db()
-        cur = conn.cursor()
-        cur.execute(qurey, param)
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        print(e)
-
-
 def fetch_sql(qurey, param):
     try:
         conn = conn_db()
@@ -46,8 +34,20 @@ def fetch_sql(qurey, param):
         conn.commit()
         cur.close()
         conn.close()
-        if result is not None:
+        if result:
             return result[0]
+    except Exception as e:
+        print(e)
+
+
+def execute_sql(qurey, param):
+    try:
+        conn = conn_db()
+        cur = conn.cursor()
+        cur.execute(qurey, param)
+        conn.commit()
+        cur.close()
+        conn.close()
     except Exception as e:
         print(e)
 
@@ -76,9 +76,17 @@ def get_point(id: int) -> int:
     point = fetch_sql("SELECT point FROM points WHERE user_id = %s", (id,))
     return point
 
-def move_point_on_given(from_id: int, to_id: int,value: int):
-    execute_sql("UPDATE points SET point = point - %s WHERE user_id = %s", (value, from_id,))
+
+def move_point_on_given(from_id: int, to_id: int, value: int):
+    execute_sql(
+        "UPDATE points SET point = point - %s WHERE user_id = %s",
+        (
+            value,
+            from_id,
+        ),
+    )
     execute_sql("UPDATE points SET point = point + %s WHERE user_id = %s", (value, to_id))
+
 
 # select文でusersテーブルからユーザー情報を取ってくる関数の定義
 def get_user(id: int, user_name: str):

@@ -3,9 +3,21 @@ import os
 from dotenv import load_dotenv as ld
 import sql_fn
 from datetime import datetime, timedelta, timezone
+from db.db_manager import User, Point
+import logging
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from db.db_manager import engine
+from db.db_manager import User, Point
+
+
+engine = create_engine("mysql://root:TpHSWotUTKhL22@db:3306/happyDB")
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 
 ld()
+
 
 TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 TARGET_GUILD_ID = os.environ["TARGET_GUILD_ID"]
@@ -22,17 +34,27 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-
-    if message.guild.id != TARGET_GUILD_ID:
-        return
-
     if message.author.bot:
         return
 
     if not message.guild:
         return
 
-    sql_fn.get_user(message.author.id, message.author.name)
+    # user = User(user_discord_id=message.author.id, user_name=message.author.name)
+    # point = Point(user_id=message.author.id)
+
+    # if user.exists():
+    #     print("ユーザーが存在します")
+
+    # SessionClass = sessionmaker(engine)  # セッションを作るクラスを作成
+    # session = SessionClass()
+
+    # session.add(user)
+    # session.commit()
+
+    # if "毛利" in message.content:
+    #     await message.reply("毛利監視中")
+    #     return
 
     if message.content == "/mypoint":
         sql_fn.get_point(message.author.id)
@@ -42,23 +64,21 @@ async def on_message(message):
     sql_fn.add_point_on_message_send(message.author.id)
 
 
-@tree.command(name="give")
-async def give_command(interaction: discord.Interaction, to_user: discord.Member, point: int):
-    if to_user.bot:
-        return
-    if interaction.user.bot:
-        return
-    if point <= 0:
-        await interaction.response.send_message("マイナスは使えないよ", ephemeral=True)
-        return
-    sql_fn.get_user(interaction.user.id, interaction.user.name)
-    sql_fn.get_user(to_user.id, to_user.name)
-    nowpt = sql_fn.get_point(interaction.user.id)
-    if nowpt < point:
-        await interaction.response.send_message(f"your point,{nowpt} , is not enough. ", ephemeral=True)
-        return
-    sql_fn.move_point_on_given(interaction.user.id, to_user.id, point)
-    await interaction.response.send_message("your point has been moved.", ephemeral=True)
+@tree.command(name="mypoint")
+async def mypoint_command(interaction: discord.interactions.Interaction):
+    user = User(user_discord_id=interaction.user.id, user_name=interaction.user.name)
+
+    if user.exists_or_create():
+        await interaction.response.send_message(f"{user.user_name}", ephemeral=False)
+    else:
+        pass
+
+
+@tree.command(name="health")
+async def give_command(
+    interaction: discord.Interaction,
+):
+    await interaction.response.send_message(f"Health : OK", ephemeral=False)
     return
 
 
@@ -68,10 +88,6 @@ async def on_raw_reaction_add(RawReactionActionEvent):
     リアクションが付与されたときに実行される
     """
 
-    if message.guild.id != TARGET_GUILD_ID:
-        return
-
-    
     user = await client.fetch_user(RawReactionActionEvent.user_id)
     user_name = user.name
 

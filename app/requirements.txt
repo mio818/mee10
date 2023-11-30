@@ -12,3 +12,4 @@ mysql-connector-python==8.1.0
 protobuf==4.21.12
 python-dotenv==1.0.0
 yarl==1.9.2
+pydantic
